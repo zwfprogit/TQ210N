@@ -1,0 +1,121 @@
+工具位置：Tools/dnw_for_linux
+目录如下：
+dnw_for_linux/
+dnw_for_linux/secbulk/
+dnw_for_linux/secbulk/Makefile
+dnw_for_linux/secbulk/secbulk.c
+dnw_for_linux/dnw/
+dnw_for_linux/dnw/dnw.c
+
+其中secbulk.c是PC端USB驱动, dnw.c是写入工具
+2 编译并加载secbulk.c内核模块
+
+$cd secbulk
+$make -C /lib/modules/`uname -r`/build M=`pwd` modules
+
+编译成功后在当前目录下可以看到secbulk.ko
+
+但是在ubuntu16.04中编译报错了，如下。
+$cd dnw_for_linux/secbulk
+dnw_for_linux/secbulk$ make -C /lib/modules/`uname -r`/build M=`pwd` modules
+make: Entering directory '/usr/src/linux-headers-4.13.0-36-generic'
+make[1]: Circular /home/myroot/dnw_for_linux/secbulk/secbulk.o <- /home/myroot/dnw_for_linux/secbulk/secbulk.o dependency dropped.
+  LD [M]  /home/myroot/dnw_for_linux/secbulk/secbulk.o
+ld: no input files
+scripts/Makefile.build:556: recipe for target '/home/myroot/dnw_for_linux/secbulk/secbulk.o' failed
+make[1]: *** [/home/myroot/dnw_for_linux/secbulk/secbulk.o] Error 1
+Makefile:1550: recipe for target '_module_/home/myroot/dnw_for_linux/secbulk' failed
+make: *** [_module_/home/myroot/dnw_for_linux/secbulk] Error 2
+make: Leaving directory '/usr/src/linux-headers-4.13.0-36-generic'
+
+报错原因是驱动的Makefile有问题。
+
+解决方法：
+修改dnw_for_linux/secbulk/Makefile如下：
+CURRENT_PATH:=$(shell pwd)
+LINUX_KERNEL_PATH:=/lib/modules/$(shell uname -r)/build
+ 
+all:
+        $(MAKE) -C $(LINUX_KERNEL_PATH) M=$(CURRENT_PATH) modules
+clean:   
+        rm -rf .*.cmd *.o *.mod.c *.ko .tmp_versions
+         
+obj-m += secbulk.o
+
+然后直接make，编译成功后在当前目录下可以看到secbulk.ko
+dnw_for_linux/secbulk$ make
+
+3.加载模块到Linux内核：
+# sudo insmod ./secbulk.ko        （注意要在root权限下）
+# dmesg        (查看是否加载成功）
+secbulk:secbulk loaded
+usbcore: registered new interface driver secbulk        （看到这样两行就说明成功了）
+
+开机的时候不会自动加载.ko文件，这样每次都要先加载才可以使用，此时将其加入开机脚本，
+使其得到自动加载,编辑/etc/init.d/rc.local 在最后加上 insmod /所在路径/secbulk.ko。
+
+4.下面开始编译dnw工具
+# cd ../dnw
+# gcc -o dnw dnw.c
+
+(编译完成，会看到dnw可执行文件）
+
+5.将文件copy到/usr/local/bin目录
+# sudo cp dnw /usr/local/bin
+
+(这样就可以在shell下面直接使用dnw命令了）
+
+6，dnw下载文件时出现can not open /dev/secbulk0 这是由于dev下没有对应设备文件secbulk0
+先说解决方法：
+进入dnw_for_linux/secbulk,打开secbulk.c
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/usb.h>
+#include <linux/fs.h>
+#include <linux/mutex.h>
+#include <linux/slab.h>
+#include <linux/uaccess.h>
+
+#define SECBULK_MAJOR	102	//主设备号
+#define SECBULK_MINOR	0	//次设备号
+#define DRIVER_NAME	"secbulk"
+
+#define BULKOUT_BUFFER_SIZE	512
+
+struct secbulk_dev
+{
+	struct usb_device *udev;
+	struct mutex io_mutex;
+	char*	bulkout_buffer;
+	__u8	bulk_out_endpointAddr;
+};
+
+我们主要修改这两行代码：
+#define SECBULK_MAJOR 102   //主设备号
+#define SECBULK_MINOR 0  //次设备号
+
+static struct usb_device_id secbulk_table[]= {
+	{ USB_DEVICE(SECBULK_MAJOR, SECBULK_MINOR)},
+	{ }
+};
+
+现在将开发板与PC连好SD卡启动进入bootloarder如果是菜单模式随意选择一个下载指令如果是命令模式则输入dnw 050008000（地址随意），在linux命令行输入lsusb 这时会出现一串的usb设备
+Bus 001 Device 004: ID 04e8:1234 Samsung Electronics Co., Ltd 
+Bus 001 Device 002: ID 14cd:168a Super Top 
+Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
+Bus 002 Device 003: ID 0e0f:0002 VMware, Inc. Virtual USB Hub
+Bus 002 Device 002: ID 0e0f:0003 VMware, Inc. Virtual Mouse
+Bus 002 Device 001: ID 1d6b:0001 Linux Foundation 1.1 root hub
+找到你的usb设备如果是三星的芯片一般是带sunsum字眼的 找到ID 后面的俩个十六进制数  如上面的ID 04e8:1234 第一个就是主设备号，第二个是次设备号 将这两个设备号替换上面说的secbulk.c 的那两个宏中的设备号保存退出 
+用root权限在secbulk.c的目录下  
+make clean
+make
+再重新安装即可
+如果还是不行请检查设备号是否正确，还有如果是用虚拟机的话请注意你的usb是否连上了虚拟机
+
+7，烧写
+sudo ./dnw filename
+
+
+
+
