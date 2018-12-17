@@ -61,17 +61,22 @@ ENTRY(_main)
  * Set up initial C runtime environment and call board_init_f(0).
  */
 
-#if defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_STACK)
-	ldr	sp, =(CONFIG_SPL_STACK)
-#else
+/* modied by zwf */
+#if !defined(CONFIG_SPL_BUILD)
 	ldr	sp, =(CONFIG_SYS_INIT_SP_ADDR)
-#endif
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	sub	sp, sp, #GD_SIZE	/* allocate one GD above SP */
 	bic	sp, sp, #7	/* 8-byte alignment for ABI compliance */
 	mov	r9, sp		/* GD is above SP */
 	mov	r0, #0
+#endif
+	/* modied by zwf */
+#ifdef CONFIG_SPL_BUILD
+	bl copy_bl2_to_ram					/* 拷贝BL2到DDR */
+	ldr pc, =CONFIG_SYS_SDRAM_BASE		/* 跳转到DDR的起始地址执行BL2 */
+#else
 	bl	board_init_f
+#endif
 
 #if ! defined(CONFIG_SPL_BUILD)
 
