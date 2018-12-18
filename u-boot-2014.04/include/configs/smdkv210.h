@@ -67,6 +67,9 @@
  ***********************************************************/
 #include <config_cmd_default.h>
 
+#define CONFIG_CMDLINE_EDITING	/*add by zwf*/
+#define CONFIG_AUTO_COMPLETE	/*add by zwf*/
+
 #undef CONFIG_CMD_FLASH
 #undef CONFIG_CMD_IMLS
 #undef CONFIG_CMD_NAND
