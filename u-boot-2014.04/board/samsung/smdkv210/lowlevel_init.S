@@ -15,6 +15,12 @@ lowlevel_init:
 #ifdef CONFIG_SPL_BUILD
 	bl clock_init		/* 时钟初始化 */
 	bl ddr_init			/* DDR初始化 */
+
+	/* add by zwf */
+	ldr r0, =0xE0200000	/* GPA0_CON */
+	ldr	r1, =0x22222222
+	str	r1, [r0]
+
 #endif
 	mov	pc, r9			/* 返回 */
 

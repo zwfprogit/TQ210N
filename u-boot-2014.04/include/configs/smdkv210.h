@@ -31,11 +31,14 @@
 /* input clock of PLL: SMDKC100 has 12MHz input clock */
 #define CONFIG_SYS_CLK_FREQ		12000000
 
+/* input clock of PLL: SMDKV210 has 24MHz input clock(add by zwf) */
+#define CONFIG_SYS_CLK_FREQ_V210		24000000
+
 /* DRAM Base */
 #define CONFIG_SYS_SDRAM_BASE		0x20000000	/* modied by zwf */
 
 /* Text Base */
-#define CONFIG_SYS_TEXT_BASE		0x34800000
+#define CONFIG_SYS_TEXT_BASE		0x20000000	/* modied by zwf */
 
 #define CONFIG_SETUP_MEMORY_TAGS
 #define CONFIG_CMDLINE_TAG
@@ -155,7 +158,7 @@
  */
 #define CONFIG_SYS_LONGHELP		/* undef to save memory */
 #define CONFIG_SYS_HUSH_PARSER		/* use "hush" command parser	*/
-#define CONFIG_SYS_PROMPT		"SMDKC100 # "
+#define CONFIG_SYS_PROMPT		"SMDKV210 # "	/* modied by zwf */
 #define CONFIG_SYS_CBSIZE	256	/* Console I/O Buffer Size */
 #define CONFIG_SYS_PBSIZE	384	/* Print Buffer Size */
 #define CONFIG_SYS_MAXARGS	16	/* max number of command args */
@@ -169,7 +172,7 @@
 /* SMDKC100 has 1 banks of DRAM, we use only one in U-Boot */
 #define CONFIG_NR_DRAM_BANKS	1
 #define PHYS_SDRAM_1		CONFIG_SYS_SDRAM_BASE	/* SDRAM Bank #1 */
-#define PHYS_SDRAM_1_SIZE	(128 << 20)	/* 0x8000000, 128 MB Bank #1 */
+#define PHYS_SDRAM_1_SIZE	(1024 << 20)	/* 0x40000000, 1024 MB Bank #1 *//*(modied by zwf)*/
 
 #define CONFIG_SYS_MONITOR_BASE	0x00000000
 
@@ -179,7 +182,7 @@
 #define CONFIG_SYS_NO_FLASH		1
 
 #define CONFIG_SYS_MONITOR_LEN		(256 << 10)	/* 256 KiB */
-#define CONFIG_IDENT_STRING		" for SMDKC100"
+#define CONFIG_IDENT_STRING		" for SMDKV210"	/* modied by zwf */
 
 #if !defined(CONFIG_NAND_SPL) && (CONFIG_SYS_TEXT_BASE >= 0xc0000000)
 #define CONFIG_ENABLE_MMU
@@ -205,7 +208,7 @@
 
 #define CONFIG_DOS_PARTITION		1
 
-#define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_SYS_LOAD_ADDR - 0x1000000)
+#define CONFIG_SYS_INIT_SP_ADDR	(CONFIG_SYS_SDRAM_BASE + PHYS_SDRAM_1_SIZE)	/* modied by zwf */
 
 /*
  * Ethernet Contoller driver
@@ -217,6 +220,6 @@
 #define CONFIG_ENV_SROM_BANK   3       /* Select SROM Bank-3 for Ethernet*/
 #endif /* CONFIG_CMD_NET */
 
-#define CONFIG_SPL
+#define CONFIG_SPL /* add by zwf */
 
 #endif	/* __CONFIG_H */
