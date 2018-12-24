@@ -98,13 +98,12 @@
 
 #define CONFIG_MTD_DEVICE
 #define CONFIG_MTD_PARTITIONS
-
-#define MTDIDS_DEFAULT		"onenand0=s3c-onenand"
-#define MTDPARTS_DEFAULT	"mtdparts=s3c-onenand:256k(bootloader)"\
+/*modied by zwf*/
+#define MTDIDS_DEFAULT		"nand0=s5p-nand"
+#define MTDPARTS_DEFAULT	"mtdparts=s5p-nand:256k(bootloader)"\
 				",128k@0x40000(params)"\
 				",3m@0x60000(kernel)"\
-				",16m@0x360000(test)"\
-				",-(UBI)"
+				",-(rootfs)"
 
 #define NORMAL_MTDPARTS_DEFAULT MTDPARTS_DEFAULT
 
