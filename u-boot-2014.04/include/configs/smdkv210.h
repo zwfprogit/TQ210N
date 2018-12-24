@@ -76,7 +76,18 @@
 
 #define CONFIG_CMD_CACHE
 #define CONFIG_CMD_REGINFO
+/*masked by zwf*/
+#if 0
 #define CONFIG_CMD_ONENAND
+#endif
+/*add by zwf*/
+#define CONFIG_CMD_NAND
+/*add by zwf*/
+#define CONFIG_SYS_MAX_NAND_DEVICE 1
+/*add by zwf*/
+#define CONFIG_SYS_NAND_BASE 0xB0E00000
+/*add by zwf*/
+#define CONFIG_NAND_S5PV210
 #define CONFIG_CMD_ELF
 #define CONFIG_CMD_FAT
 #define CONFIG_CMD_MTDPARTS
@@ -200,7 +211,12 @@
 /*-----------------------------------------------------------------------
  * Boot configuration
  */
+ /*maske by zwf*/
+#if 0
 #define CONFIG_ENV_IS_IN_ONENAND	1
+#endif
+/*add by zwf*/
+#define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_ENV_SIZE			(128 << 10)	/* 128KiB, 0x20000 */
 #define CONFIG_ENV_ADDR			(256 << 10)	/* 256KiB, 0x40000 */
 #define CONFIG_ENV_OFFSET		(256 << 10)	/* 256KiB, 0x40000 */
@@ -217,10 +233,24 @@
  * Ethernet Contoller driver
  */
 #ifdef CONFIG_CMD_NET
+/* masked by zwf */
+#if 0
 #define CONFIG_SMC911X         1       /* we have a SMC9115 on-board   */
 #define CONFIG_SMC911X_16_BIT  1       /* SMC911X_16_BIT Mode          */
 #define CONFIG_SMC911X_BASE    0x98800300      /* SMC911X Drive Base   */
-#define CONFIG_ENV_SROM_BANK   3       /* Select SROM Bank-3 for Ethernet*/
+#endif
+/* modied by zwf */
+#define CONFIG_ENV_SROM_BANK   1       /* Select SROM Bank-1 for Ethernet*/
+/* add by zwf */
+#define CONFIG_DRIVER_DM9000
+#define CONFIG_DM9000_NO_SROM
+#define CONFIG_DM9000_BASE		0x88000000
+#define DM9000_IO				(CONFIG_DM9000_BASE)
+#define DM9000_DATA				(CONFIG_DM9000_BASE + 0x4)
+#define CONFIG_CMD_PING
+#define CONFIG_IPADDR			192.168.1.120
+#define CONFIG_SERVERIP			192.168.1.101
+#define CONFIG_ETHADDR			1A:2A:3A:4A:5A:6A
 #endif /* CONFIG_CMD_NET */
 
 #define CONFIG_SPL /* add by zwf */

@@ -262,7 +262,6 @@ dm9000_reset(void)
 		DM9000_DBG("resetting the DM9000, 1st reset\n");
 		udelay(25); /* Wait at least 20 us */
 	} while (DM9000_ior(DM9000_NCR) & 1);
-
 	DM9000_iow(DM9000_NCR, 0);
 	DM9000_iow(DM9000_NCR, (NCR_LBK_INT_MAC | NCR_RST)); /* Issue a second reset */
 
@@ -270,7 +269,7 @@ dm9000_reset(void)
 		DM9000_DBG("resetting the DM9000, 2nd reset\n");
 		udelay(25); /* Wait at least 20 us */
 	} while (DM9000_ior(DM9000_NCR) & 1);
-
+	udelay(150);/*add by zwf*/
 	/* Check whether the ethernet controller is present */
 	if ((DM9000_ior(DM9000_PIDL) != 0x0) ||
 	    (DM9000_ior(DM9000_PIDH) != 0x90))
