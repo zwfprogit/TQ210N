@@ -12,6 +12,7 @@
 #include <asm/arch/gpio.h>
 #include <asm/arch/clock.h>		/* add by zwf */
 #include <asm/arch/dmc.h>		/* add by zwf */
+#include <asm/arch/nand_reg.h>	/* add by zwf */
 #include <netdev.h>
 
 #ifndef CONFIG_SPL_BUILD	/* add by zwf */
@@ -141,7 +142,7 @@ void clock_init(void)
 	*/
 	writel((1 << 0) | (1 << 4) | (1 << 8) | (1 << 12), &clock->src0);
 
-	/* 4.设置其他模块的时钟源 */
+	/* 5.设置其他模块的时钟源 */
 
 	/* 6.设置系统时钟分频值 */
 	val = 	(0 << 0)  |	/* APLL_RATIO = 0, freq(ARMCLK) = MOUT_MSYS / (APLL_RATIO + 1) = 1000MHz */
@@ -244,22 +245,70 @@ void copy_bl2_to_ram(void)
 ** sb:  起始块
 ** bs:  块大小
 ** dst: 目的地
-** i: 	是否初始化
+** i: 是否初始化
 */
+
 #define CopySDMMCtoMem(ch, sb, bs, dst, i) \
-	(((unsigned char(*)(int, unsigned int, unsigned short, unsigned int*, unsigned char))\
-	(*((unsigned int *)0xD0037F98)))(ch, sb, bs, dst, i))
+	(((u8(*)(int, u32, unsigned short, u32*, u8))\
+	(*((u32 *)0xD0037F98)))(ch, sb, bs, dst, i))
 
-	unsigned int V210_SDMMC_BASE = *(volatile unsigned int *)(0xD0037488);	// V210_SDMMC_BASE
-	unsigned char ch = 0;
+#define MP0_1CON  (*(volatile u32 *)0xE02002E0)
+#define	MP0_3CON  (*(volatile u32 *)0xE0200320)
+#define	MP0_6CON  (*(volatile u32 *)0xE0200380)
 
-	/* 参考S5PV210手册7.9.1 SD/MMC REGISTER MAP */
-	if (V210_SDMMC_BASE == 0xEB000000)		// 通道0
-		ch = 0;
-	else if (V210_SDMMC_BASE == 0xEB200000)	// 通道2
-		ch = 2;
+#define NF8_ReadPage_Adv(a,b,c) (((int(*)(u32, u32, u8*))(*((u32 *)0xD0037F90)))(a,b,c))
 
-	CopySDMMCtoMem(ch, 32, 500, (unsigned int *)CONFIG_SYS_SDRAM_BASE, 0);
+	u32 bl2Size = 250 * 1024;	// 250K
+
+	u32 OM = *(volatile u32 *)(0xE0000004);	// OM Register
+	OM &= 0x1F;					// 取低5位
+
+	if (OM == 0x2)				// NAND 2 KB, 5cycle 8-bit ECC
+	{
+		u32 cfg = 0;
+		struct s5pv210_nand *nand_reg = (struct s5pv210_nand *)(struct s5pv210_nand *)samsung_get_base_nand();
+
+		/* initialize hardware */
+		/* HCLK_PSYS=133MHz(7.5ns) */
+		cfg =	(0x1 << 23) |	/* Disable 1-bit and 4-bit ECC */
+				/* 下面3个时间参数稍微比计算出的值大些（我这里依次加1），否则读写不稳定 */
+				(0x3 << 12) |	/* 7.5ns * 2 > 12ns tALS tCLS */
+				(0x2 << 8) | 	/* (1+1) * 7.5ns > 12ns (tWP) */
+				(0x1 << 4) | 	/* (0+1) * 7.5 > 5ns (tCLH/tALH) */
+				(0x0 << 3) | 	/* SLC NAND Flash */
+				(0x0 << 2) |	/* 2KBytes/Page */
+				(0x1 << 1);		/* 5 address cycle */
+
+		writel(cfg, &nand_reg->nfconf);
+
+		writel((0x1 << 1) | (0x1 << 0), &nand_reg->nfcont);
+		/* Disable chip select and Enable NAND Flash Controller */
+
+		/* Config GPIO */
+		MP0_1CON &= ~(0xFFFF << 8);
+		MP0_1CON |= (0x3333 << 8);
+		MP0_3CON = 0x22222222;
+		MP0_6CON = 0x22222222;
+
+		int i = 0;
+		int pages = bl2Size / 2048;			// 多少页
+		int offset = 0x4000 / 2048;			// u-boot.bin在NAND中的偏移地址(页地址)
+		u8 *p = (u8 *)CONFIG_SYS_SDRAM_BASE;
+		for (; i < pages; i++, p += 2048, offset += 1)
+			NF8_ReadPage_Adv(offset / 64, offset % 64, p);
+	}
+	else if (OM == 0xC)		// SD/MMC
+	{
+		u32 V210_SDMMC_BASE = *(volatile u32 *)(0xD0037488);	// V210_SDMMC_BASE
+		u8 ch = 0;
+
+		/* 参考S5PV210手册7.9.1 SD/MMC REGISTER MAP */
+		if (V210_SDMMC_BASE == 0xEB000000)			// 通道0
+			ch = 0;
+		else if (V210_SDMMC_BASE == 0xEB200000)		// 通道2
+			ch = 2;
+		CopySDMMCtoMem(ch, 32, bl2Size / 512, (u32 *)CONFIG_SYS_SDRAM_BASE, 0);
+	}
 }
 
 #endif	/* CONFIG_SPL_BUILD (add by zwf) */
