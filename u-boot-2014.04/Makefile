@@ -695,7 +695,8 @@ DO_STATIC_RELA =
 endif
 
 # Always append ALL so that arch config.mk's can add custom ones
-ALL-y += u-boot.srec u-boot.bin System.map
+# combine add by zwf
+ALL-y += u-boot.srec u-boot.bin System.map combine
 
 ALL-$(CONFIG_NAND_U_BOOT) += u-boot-nand.bin
 ALL-$(CONFIG_ONENAND_U_BOOT) += u-boot-onenand.bin
@@ -772,6 +773,12 @@ u-boot.bin: u-boot FORCE
 	$(call if_changed,objcopy)
 	$(call DO_STATIC_RELA,$<,$@,$(CONFIG_SYS_TEXT_BASE))
 	$(BOARD_SIZE_CHECK)
+#add by zwf
+combine:u-boot.bin spl/u-boot-spl.bin FORCE
+	cp $(objtree)/spl/smdkv210-spl.bin $(objtree)/tmp.bin
+	truncate $(objtree)/tmp.bin -c -s 16K
+	cat $(objtree)/u-boot.bin >> $(objtree)/tmp.bin
+	cp $(objtree)/tmp.bin $(objtree)/u-boot-a.bin
 
 u-boot.ldr:	u-boot
 		$(CREATE_LDR_ENV)
