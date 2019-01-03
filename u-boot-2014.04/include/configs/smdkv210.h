@@ -69,6 +69,11 @@
 
 #define CONFIG_CMDLINE_EDITING	/*add by zwf*/
 #define CONFIG_AUTO_COMPLETE	/*add by zwf*/
+/*add by zwf for bootmenu follow 4*/
+ #define CONFIG_CMD_BOOTMENU
+ #define CONFIG_MENU
+ #define CONFIG_AUTOBOOT_KEYED
+ #define CONFIG_MENU_SHOW
 
 #undef CONFIG_CMD_FLASH
 #undef CONFIG_CMD_IMLS
