@@ -100,7 +100,8 @@
 #if LCD_BPP == LCD_MONOCHROME
 # define COLOR_MASK(c)		((c)	  | (c) << 1 | (c) << 2 | (c) << 3 | \
 				 (c) << 4 | (c) << 5 | (c) << 6 | (c) << 7)
-#elif (LCD_BPP == LCD_COLOR8) || (LCD_BPP == LCD_COLOR16)
+/* modied by zwf */
+#elif (LCD_BPP == LCD_COLOR8) || (LCD_BPP == LCD_COLOR16) || (LCD_BPP == LCD_COLOR24)
 # define COLOR_MASK(c)		(c)
 #else
 # error Unsupported LCD BPP.
@@ -305,6 +306,9 @@ static void lcd_drawchars(ushort x, ushort y, uchar *str, int count)
 		int i;
 #if LCD_BPP == LCD_COLOR16
 		ushort *d = (ushort *)dest;
+/* add by zwf */
+#elif LCD_BPP == LCD_COLOR24
+		uint*d = (uint *)dest;
 #else
 		uchar *d = dest;
 #endif
@@ -332,6 +336,13 @@ static void lcd_drawchars(ushort x, ushort y, uchar *str, int count)
 				bits <<= 1;
 			}
 #elif LCD_BPP == LCD_COLOR16
+			for (c = 0; c < 8; ++c) {
+				*d++ = (bits & 0x80) ?
+						lcd_color_fg : lcd_color_bg;
+				bits <<= 1;
+			}
+/* add by zwf */
+#elif LCD_BPP == LCD_COLOR24
 			for (c = 0; c < 8; ++c) {
 				*d++ = (bits & 0x80) ?
 						lcd_color_fg : lcd_color_bg;
@@ -472,6 +483,7 @@ void lcd_clear(void)
 #endif
 	/* Paint the logo and retrieve LCD base address */
 	debug("[LCD] Drawing the logo...\n");
+	puts("[LCD] Drawing the logo...\n");
 	lcd_console_address = lcd_logo();
 
 	console_col = 0;
@@ -1079,14 +1091,14 @@ static void *lcd_logo(void)
 	char *s;
 	ulong addr;
 	static int do_splash = 1;
-
+	printf ("lcd_logo %s\n", getenv("splashimage"));
 	if (do_splash && (s = getenv("splashimage")) != NULL) {
 		int x = 0, y = 0;
 		do_splash = 0;
-
+		puts("lcd_logo1\r\n");
 		if (splash_screen_prepare())
 			return (void *)lcd_base;
-
+		puts("lcd_logo2\r\n");
 		addr = simple_strtoul (s, NULL, 16);
 
 		splash_get_pos(&x, &y);
