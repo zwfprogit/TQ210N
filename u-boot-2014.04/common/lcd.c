@@ -1091,14 +1091,11 @@ static void *lcd_logo(void)
 	char *s;
 	ulong addr;
 	static int do_splash = 1;
-	printf ("lcd_logo %s\n", getenv("splashimage"));
 	if (do_splash && (s = getenv("splashimage")) != NULL) {
 		int x = 0, y = 0;
 		do_splash = 0;
-		puts("lcd_logo1\r\n");
 		if (splash_screen_prepare())
 			return (void *)lcd_base;
-		puts("lcd_logo2\r\n");
 		addr = simple_strtoul (s, NULL, 16);
 
 		splash_get_pos(&x, &y);
