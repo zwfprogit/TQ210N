@@ -24,7 +24,7 @@ void uart_init()
 	/* Interrupt request or polling mode/Normal transmit/Normal operation/PCLK/*/
 	UCON0 = 1 | (1 << 2) | (0 << 10);
 
-	/* 静止FIFO */
+	/* 禁止FIFO */
 	UFCON0 = 0;
 
 	/*
