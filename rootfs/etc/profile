@@ -1,0 +1,16 @@
+#!/bin/sh
+
+`hostname zwf` 
+HOSTNAME=`hostname`
+USER=`id -un`
+LOGNAME=$USER
+HOME=$USER
+PS1="[\u@$\h: \W]\# "
+PATH=/bin:/sbin:/usr/bin:/usr/sbin
+LD_LIBRARY_PATH=/lib:/usr/lib:$LD_LIBRARY_PATH
+
+export PATH LD_LIBRARY_PATH HOSTNAME USER PS1 LOGNAME HOME
+alias ll="ls -l"
+
+echo "Processing /etc/profile... " 
+echo "Done"
