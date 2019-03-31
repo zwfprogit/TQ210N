@@ -48,6 +48,10 @@
 #include <plat/backlight.h>
 #include <plat/mfc.h>
 #include <plat/clock.h>
+/*add by zwf*/
+#include <plat/nand-core.h>
+#include <linux/platform_data/mtd-nand-s3c2410.h>
+#include <linux/mtd/partitions.h>
 
 #include "common.h"
 
@@ -206,6 +210,72 @@ static struct s3c_fb_platdata smdkv210_lcd0_pdata __initdata = {
 
 /* USB OTG */
 static struct s3c_hsotg_plat smdkv210_hsotg_pdata;
+/* nand info (add by zwf) */
+static struct mtd_partition smdk_default_nand_part[] = {
+	[0] = {
+		.name	= "bootloader",
+		.size	= SZ_256K,
+		.offset	= 0,
+	},
+	[1] = {
+		.name	= "params",
+		.offset = MTDPART_OFS_APPEND,
+		.size	= SZ_128K,
+	},
+	[2] = {
+		.name	= "log",
+		.offset = MTDPART_OFS_APPEND,
+		.size	= SZ_2M,
+	},
+	[3] = {
+		.name	= "kernel",
+		.offset	= MTDPART_OFS_APPEND,
+		.size	= SZ_1M + SZ_2M,
+	},
+	[4] = {
+		.name	= "rootfs",
+		.offset = MTDPART_OFS_APPEND,
+		.size	= MTDPART_SIZ_FULL,
+	}
+};
+
+static struct s3c2410_nand_set smdk_nand_sets[] = {
+	[0] = {
+		.name		= "NAND",
+		.nr_chips	= 1,
+		.nr_partitions	= ARRAY_SIZE(smdk_default_nand_part),
+		.partitions	= smdk_default_nand_part,
+		.disable_ecc = 1,
+	},
+};
+
+static struct s3c2410_platform_nand smdk_nand_info = {
+	.tacls		= 12,
+	.twrph0		= 12,
+	.twrph1		= 5,
+	.nr_sets	= ARRAY_SIZE(smdk_nand_sets),
+	.sets		= smdk_nand_sets,
+};
+
+static void s5pv210_nand_gpio_cfg(void)
+{
+	volatile unsigned long *mp01;
+	volatile unsigned long *mp03;
+	volatile unsigned long *mp06;
+
+	mp01 = (volatile unsigned long *)ioremap(0xE02002E0, 4);
+	mp03 = (volatile unsigned long *)ioremap(0xE0200320, 4);
+	mp06 = (volatile unsigned long *)ioremap(0xE0200380, 4);
+
+	*mp01 &= ~(0xFFFF << 8);
+	*mp01 |= (0x3333 << 8);
+	*mp03 = 0x22222222;
+	*mp06 = 0x22222222;
+
+	iounmap(mp01);
+	iounmap(mp03);
+	iounmap(mp06);
+}
 
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&s3c_device_adc,
@@ -237,6 +307,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&samsung_device_keypad,
 	&smdkv210_dm9000,
 	&smdkv210_lcd_lte480wv,
+	&s3c_device_nand,	/* add by zwf */
 };
 
 static void __init smdkv210_dm9000_init(void)
@@ -298,6 +369,11 @@ static void __init smdkv210_machine_init(void)
 	s3c_pm_init();
 	/*masked by zwf*/
 	//smdkv210_dm9000_init();
+
+	/*add by zwf*/
+	s3c_nand_setname("s5pv210-nand");
+	s3c_nand_set_platdata(&smdk_nand_info);
+	s5pv210_nand_gpio_cfg();
 
 	samsung_keypad_set_platdata(&smdkv210_keypad_data);
 	s3c24xx_ts_set_platdata(NULL);
