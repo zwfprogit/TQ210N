@@ -163,7 +163,7 @@ void __init s5pv210_init_io(struct map_desc *mach_desc, int size)
 
 	/* detect cpu id and rev. */
 	s5p_init_cpu(S5P_VA_CHIPID);
-
+	// s5pv210 samsung_cpu_id = 0x43110220 [add by zwf]
 	s3c_init_cpu(samsung_cpu_id, cpu_ids, ARRAY_SIZE(cpu_ids));
 }
 
