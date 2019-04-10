@@ -52,6 +52,7 @@
 #include <plat/nand-core.h>
 #include <linux/platform_data/mtd-nand-s3c2410.h>
 #include <linux/mtd/partitions.h>
+#include <linux/mtd/mtd.h>
 
 #include "common.h"
 
@@ -238,6 +239,23 @@ static struct mtd_partition smdk_default_nand_part[] = {
 		.size	= MTDPART_SIZ_FULL,
 	}
 };
+/*add by zwf*/
+static struct nand_ecclayout nand_oob_64 = {
+	.eccbytes = 52,		/* 2048 / 512 * 13 */
+	.eccpos = {	12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+				22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
+				32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+				42, 43, 44, 45, 46, 47, 48, 49, 50, 51,
+				52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+				62, 63},
+	/* 0和1用于保存坏块标记，12~63保存ecc，剩余2~11为free */
+	.oobfree = {
+		{
+			.offset = 2,
+			.length = 10
+		}
+	}
+};
 
 static struct s3c2410_nand_set smdk_nand_sets[] = {
 	[0] = {
@@ -245,7 +263,8 @@ static struct s3c2410_nand_set smdk_nand_sets[] = {
 		.nr_chips	= 1,
 		.nr_partitions	= ARRAY_SIZE(smdk_default_nand_part),
 		.partitions	= smdk_default_nand_part,
-		.disable_ecc = 1,
+		.disable_ecc = 0,/*modify by zwf*/
+		.ecc_layout = &nand_oob_64,/*add by zwf*/
 	},
 };
 
