@@ -31,10 +31,11 @@ static void s5pv210_fb_cfg_gpios(unsigned int base, unsigned int nr)
 
 void s5pv210_fb_gpio_setup_24bpp(void)
 {
-	s5pv210_fb_cfg_gpios(S5PV210_GPF0(0), 8);
-	s5pv210_fb_cfg_gpios(S5PV210_GPF1(0), 8);
-	s5pv210_fb_cfg_gpios(S5PV210_GPF2(0), 8);
-	s5pv210_fb_cfg_gpios(S5PV210_GPF3(0), 4);
+	/* 设置LCD相关的28个寄存器,24bpp数据线+4条时钟或时钟极性相关的 */
+	s5pv210_fb_cfg_gpios(S5PV210_GPF0(0), 8);/*HSYNC,VSYNC,VDEN,VCLK,VD0~3寄存器*/
+	s5pv210_fb_cfg_gpios(S5PV210_GPF1(0), 8);/*VD4~11*/
+	s5pv210_fb_cfg_gpios(S5PV210_GPF2(0), 8);/*VD12~19*/
+	s5pv210_fb_cfg_gpios(S5PV210_GPF3(0), 4);/*VD20~23*/
 
 	/* Set DISPLAY_CONTROL register for Display path selection.
 	 *
@@ -45,5 +46,5 @@ void s5pv210_fb_gpio_setup_24bpp(void)
 	 *  10     |  FIMD   |  FIMD   |  FIMD
 	 *  11     |  FIMD   |  FIMD   |  FIMD
 	 */
-	writel(0x2, S5P_MDNIE_SEL);
+	writel(0x2, S5P_MDNIE_SEL); /* 显示模式 */
 }

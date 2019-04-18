@@ -1186,7 +1186,6 @@ static int s3c24xx_nand_probe(struct platform_device *pdev)
 	info->device	= &pdev->dev;
 	info->platform	= plat;
 	info->cpu_type	= cpu_type;
-
 	info->regs = devm_ioremap_resource(&pdev->dev, res);
 	if (IS_ERR(info->regs)) {
 		err = PTR_ERR(info->regs);

@@ -165,10 +165,10 @@ struct platform_device samsung_asoc_idma = {
 
 #ifdef CONFIG_S3C_DEV_FB
 static struct resource s3c_fb_resource[] = {
-	[0] = DEFINE_RES_MEM(S3C_PA_FB, SZ_16K),
-	[1] = DEFINE_RES_IRQ(IRQ_LCD_VSYNC),
-	[2] = DEFINE_RES_IRQ(IRQ_LCD_FIFO),
-	[3] = DEFINE_RES_IRQ(IRQ_LCD_SYSTEM),
+	[0] = DEFINE_RES_MEM(S3C_PA_FB, SZ_16K),//S3C_PA_FB==S5PV210_PA_FB(0xF8000000) flags=IORESOURCE_MEM
+	[1] = DEFINE_RES_IRQ(IRQ_LCD_VSYNC),//IRQ_LCD_VSYNC=IRQ_LCD1=S5P_IRQ_VIC2(1)=(S5P_VIC2_BASE + (x))=S5P_IRQ(64)+1=97
+	[2] = DEFINE_RES_IRQ(IRQ_LCD_FIFO),// 96
+	[3] = DEFINE_RES_IRQ(IRQ_LCD_SYSTEM),//98
 };
 
 struct platform_device s3c_device_fb = {

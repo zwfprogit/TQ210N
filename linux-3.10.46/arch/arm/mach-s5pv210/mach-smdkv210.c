@@ -154,7 +154,8 @@ static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
 		gpio_request_one(S5PV210_GPD0(3), GPIOF_OUT_INIT_HIGH, "GPD0");
 		gpio_free(S5PV210_GPD0(3));
 #endif
-
+/*modify by zwf*/
+#if 0
 		/* fire nRESET on power up */
 		gpio_request_one(S5PV210_GPH0(6), GPIOF_OUT_INIT_HIGH, "GPH0");
 
@@ -165,6 +166,7 @@ static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
 		mdelay(10);
 
 		gpio_free(S5PV210_GPH0(6));
+#endif
 	} else {
 #if !defined(CONFIG_BACKLIGHT_PWM)
 		gpio_request_one(S5PV210_GPD0(3), GPIOF_OUT_INIT_LOW, "GPD0");

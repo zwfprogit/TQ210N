@@ -1372,7 +1372,8 @@ static int s3c_fb_probe(struct platform_device *pdev)
 
 	platid = platform_get_device_id(pdev);
 	fbdrv = (struct s3c_fb_driverdata *)platid->driver_data;
-
+	printk("s3c_fb_probe()\r\n");
+	printk("platform device name [%s]\r\n",platid->name);
 	if (fbdrv->variant.nr_windows > S3C_FB_MAX_WIN) {
 		dev_err(dev, "too many windows, cannot attach\n");
 		return -EINVAL;
