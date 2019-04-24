@@ -1,0 +1,1 @@
+arm-linux-gcc -static -o led_app led_app.c
