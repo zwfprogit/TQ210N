@@ -1,0 +1,1 @@
+arm-linux-gcc -static -o i2c_test ic2_test.c
