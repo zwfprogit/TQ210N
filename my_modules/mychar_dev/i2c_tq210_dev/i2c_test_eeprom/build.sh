@@ -1,0 +1,1 @@
+arm-linux-gcc -static -o at24_ctl at24_ctl.c
