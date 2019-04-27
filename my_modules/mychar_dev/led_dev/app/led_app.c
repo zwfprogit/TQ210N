@@ -5,6 +5,7 @@
 #include <sys/ioctl.h>
 #include <stdlib.h>
 #include "../driver/led.h"
+#include <errno.h>
 
 int main(int argc, char *argv[])
 {
@@ -21,15 +22,18 @@ int main(int argc, char *argv[])
 
 	fd = open("/dev/myled",O_RDWR);
 	if(fd < 0){
-		printf("open dev fail!\n"); 
+		perror("open /dev/myled");
 		exit(1);
 	}
-
+#if 0
 	if (cmd == 1)
 		ioctl(fd,LED_ON);
 	else
 		ioctl(fd,LED_OFF);
+#else
+	write(fd,&cmd,sizeof(int));
+#endif
 	close(fd);
 
-     return 0;
+    return 0;
 }
