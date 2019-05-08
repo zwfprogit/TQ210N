@@ -1,7 +1,7 @@
 #
 # Automatically generated make config: don't edit
 # Busybox version: 1.21.1
-# Sun Mar 17 21:36:56 2019
+# Wed May  8 22:04:05 2019
 #
 CONFIG_HAVE_DOT_CONFIG=y
 
@@ -449,8 +449,8 @@ CONFIG_FEATURE_MESG_ENABLE_ONLY_GROUP=y
 #
 # Login/Password Management Utilities
 #
-# CONFIG_ADD_SHELL is not set
-# CONFIG_REMOVE_SHELL is not set
+CONFIG_ADD_SHELL=y
+CONFIG_REMOVE_SHELL=y
 CONFIG_FEATURE_SHADOWPASSWDS=y
 CONFIG_USE_BB_PWD_GRP=y
 CONFIG_USE_BB_SHADOW=y
