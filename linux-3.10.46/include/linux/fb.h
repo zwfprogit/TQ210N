@@ -760,20 +760,25 @@ extern const struct fb_cmap *fb_default_cmap(int len);
 extern void fb_invert_cmaps(void);
 
 struct fb_videomode {
-	const char *name;	/* optional */
-	u32 refresh;		/* optional */
-	u32 xres;
-	u32 yres;
+	const char *name;	/* optional  液晶屏名字（可选）*/
+	u32 refresh;		/* optional  刷新频率（内核中很多例子都赋值为60）*/
+	u32 xres;	/*每行的像素个数,也叫水平分辨率*/
+	u32 yres;	/*屏幕的行数，也叫垂直分辨率*/
+	/*pixclock:像素时钟: 每个像素时钟周期的长度，单位是皮秒（10的负12次方分之1秒）
+	假设CLK clock time=28MHz可以看到LCD时钟是28M，所以pixclock=1000000/28*/
 	u32 pixclock;
-	u32 left_margin;
-	u32 right_margin;
-	u32 upper_margin;
-	u32 lower_margin;
-	u32 hsync_len;
-	u32 vsync_len;
-	u32 sync;
-	u32 vmode;
-	u32 flag;
+	u32 left_margin; /*HBP  (Horizontal Back Porch) 水平后沿:在每行或每列的象素数据开始输出时要插入的象
+素时钟周期数*/
+	u32 right_margin;/*HFP (Horizontal Front Porch )水平前沿,在每行或每列的象素结束到LCD 行时钟输出脉冲
+之间的象素时钟数*/
+	u32 upper_margin;/*VBP (Vertical Back Porch) 垂直后沿:在垂直同步周期之后帧开头时的无效行数*/
+	u32 lower_margin;/*VFP (Vertical Front Porch)垂直前沿:本帧数据输出结束到下一帧垂直同步周期开始之
+前的无效行数*/
+	u32 hsync_len;/*HPW  (HSYNC plus width)行同步脉宽:单位：像素时钟周期*/
+	u32 vsync_len;/*VPW (VSYNC width)垂直同步脉宽:单位：显示一行的时间th*/
+	u32 sync;/*同步极性设置:可以根据需要设置FB_SYNC_HOR_HIGH_ACT(水平同步高电平有效)和FB_SYNC_VERT_HIGH_ACT(垂直同步高电平有效)*/
+	u32 vmode;/*在内核中的大多数示例都直接置为FB_VMODE_NONINTERLACED。interlaced的意思是交错［隔行］扫描，电视中使用2:1的交错率, 即每帧分两场,垂直扫描两次,一场扫描奇数行,另一场扫描偶数行。很显然LCD目前不是这种模式。*/
+	u32 flag;/*目前没有看到用法*/
 };
 
 extern const char *fb_mode_option;

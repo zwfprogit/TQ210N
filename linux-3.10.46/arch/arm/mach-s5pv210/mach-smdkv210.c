@@ -145,14 +145,14 @@ static struct platform_device smdkv210_dm9000 = {
 		.platform_data	= &smdkv210_dm9000_platdata,
 	},
 };
-
+/* modied by zwf */
 static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
 					unsigned int power)
 {
 	if (power) {
 #if !defined(CONFIG_BACKLIGHT_PWM)
-		gpio_request_one(S5PV210_GPD0(3), GPIOF_OUT_INIT_HIGH, "GPD0");
-		gpio_free(S5PV210_GPD0(3));
+		gpio_request_one(S5PV210_GPD0(0), GPIOF_OUT_INIT_HIGH, "GPD0");/* modied by zwf  3->0*/
+		gpio_free(S5PV210_GPD0(0));/* modied by zwf 3->0 */
 #endif
 /*modify by zwf*/
 #if 0
@@ -169,8 +169,8 @@ static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
 #endif
 	} else {
 #if !defined(CONFIG_BACKLIGHT_PWM)
-		gpio_request_one(S5PV210_GPD0(3), GPIOF_OUT_INIT_LOW, "GPD0");
-		gpio_free(S5PV210_GPD0(3));
+		gpio_request_one(S5PV210_GPD0(0), GPIOF_OUT_INIT_LOW, "GPD0");/* modied by zwf  3->0*/
+		gpio_free(S5PV210_GPD0(0));/* modied by zwf  3->0*/
 #endif
 	}
 }
@@ -191,16 +191,16 @@ static struct s3c_fb_pd_win smdkv210_fb_win0 = {
 	.xres		= 800,
 	.yres		= 480,
 };
-
+/*modify by zwf*/
 static struct fb_videomode smdkv210_lcd_timing = {
-	.left_margin	= 13,
-	.right_margin	= 8,
-	.upper_margin	= 7,
-	.lower_margin	= 5,
-	.hsync_len	= 3,
-	.vsync_len	= 1,
-	.xres		= 800,
-	.yres		= 480,
+	.left_margin	= 46,// 13->46 modify by zwf
+	.right_margin	= 210,// 8->210 modify by zwf
+	.upper_margin	= 23,// 7->23 modify by zwf
+	.lower_margin	= 22,// 5-> 22 modify by zwf
+	.hsync_len	= 2,	// 3->2 modify by zwf
+	.vsync_len	= 2,// 1->2 modify by zwf
+	.xres		= 800,// 800->800 modify by zwf
+	.yres		= 480,// 480->480 modify by zwf
 };
 
 static struct s3c_fb_platdata smdkv210_lcd0_pdata __initdata = {
@@ -364,12 +364,12 @@ static struct i2c_board_info smdkv210_i2c_devs2[] __initdata = {
 
 /* LCD Backlight data */
 static struct samsung_bl_gpio_info smdkv210_bl_gpio_info = {
-	.no = S5PV210_GPD0(3),
+	.no = S5PV210_GPD0(0),	/* modied by zwf  3->0*/
 	.func = S3C_GPIO_SFN(2),
 };
 
 static struct platform_pwm_backlight_data smdkv210_bl_data = {
-	.pwm_id = 3,
+	.pwm_id = 0,	/* modied by zwf  3->0*/
 	.pwm_period_ns = 1000,
 };
 
