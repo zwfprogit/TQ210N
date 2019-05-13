@@ -79,7 +79,7 @@ static int platform_lcd_probe(struct platform_device *pdev)
 	struct platform_lcd *plcd;
 	struct device *dev = &pdev->dev;
 	int err;
-
+	/*1,pdev=&smdkv210_lcd_lte480wv*/
 	pdata = pdev->dev.platform_data;
 	if (!pdata) {
 		dev_err(dev, "no platform data supplied\n");

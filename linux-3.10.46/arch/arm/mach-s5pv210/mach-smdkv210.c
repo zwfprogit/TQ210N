@@ -327,7 +327,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&samsung_asoc_idma,
 	&samsung_device_keypad,
 	&smdkv210_dm9000,
-	&smdkv210_lcd_lte480wv,
+	&smdkv210_lcd_lte480wv,/*platform_lcd_probe */
 	&s3c_device_nand,	/* add by zwf */
 };
 

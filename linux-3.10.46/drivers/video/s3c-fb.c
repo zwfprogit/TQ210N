@@ -360,7 +360,8 @@ static int s3c_fb_calc_pixclk(struct s3c_fb *sfb, unsigned int pixclk)
 
 	do_div(tmp, 1000000000UL);
 	result = (unsigned int)tmp / 1000;
-
+	/* add by zwf */
+	printk("pixclk=%u, clk=%lu, div=%d (%lu)\n",pixclk, clk, result, result ? clk / result : clk);
 	dev_dbg(sfb->dev, "pixclk=%u, clk=%lu, div=%d (%lu)\n",
 		pixclk, clk, result, result ? clk / result : clk);
 
@@ -1059,7 +1060,7 @@ static struct fb_ops s3c_fb_ops = {
  */
 static void s3c_fb_missing_pixclock(struct fb_videomode *mode)
 {
-	u64 pixclk = 1000000000000ULL;
+	u64 pixclk = 1000000000000ULL;// 1s=10^12 ps
 	u32 div;
 
 	div  = mode->left_margin + mode->hsync_len + mode->right_margin +
@@ -1313,22 +1314,35 @@ static void s3c_fb_set_rgb_timing(struct s3c_fb *sfb)
 
 	if (sfb->variant.is_2443)
 		data |= (1 << 5);
+	//printk("data=0x%x >> regs + VIDCON0\r\n",data);
+	/*data=0xd0 = 1101 0000
+	VIDCON0:
+	[4]=1:1 = Divided by CLKVAL_F
+	*/
 	writel(data, regs + VIDCON0);
 
 	data = VIDTCON0_VBPD(vmode->upper_margin - 1) |
 	       VIDTCON0_VFPD(vmode->lower_margin - 1) |
 	       VIDTCON0_VSPW(vmode->vsync_len - 1);
+	//printk("data=0x%x >> regs + sfb->variant.vidtcon [VIDTCON0]\r\n",data);
 	writel(data, regs + sfb->variant.vidtcon);
 
 	data = VIDTCON1_HBPD(vmode->left_margin - 1) |
 	       VIDTCON1_HFPD(vmode->right_margin - 1) |
 	       VIDTCON1_HSPW(vmode->hsync_len - 1);
+	//printk("data=0x%x >> regs + sfb->variant.vidtcon + 4 [VIDTCON1]\r\n",data);
 	writel(data, regs + sfb->variant.vidtcon + 4);
 
 	data = VIDTCON2_LINEVAL(vmode->yres - 1) |
 	       VIDTCON2_HOZVAL(vmode->xres - 1) |
 	       VIDTCON2_LINEVAL_E(vmode->yres - 1) |
 	       VIDTCON2_HOZVAL_E(vmode->xres - 1);
+	//printk("data=0x%x >> regs + sfb->variant.vidtcon + 8  [VIDTCON2]\r\n",data);
+	/*data 0xefb1f := 1110 1111 1011 0001 1111
+	VIDTCON2:
+	[21:11]=1110 1111 1=0x1DF:LINEVAL
+	[10:0]=011 0001 1111=0x31F:HOZVAL
+	NOTE: HOZVAL = (Horizontal display size) -1 and LINEVAL = (Vertical display size)-1.*/
 	writel(data, regs + sfb->variant.vidtcon + 8);
 }
 
@@ -1343,6 +1357,11 @@ static void s3c_fb_clear_win(struct s3c_fb *sfb, int win)
 {
 	void __iomem *regs = sfb->regs;
 	u32 reg;
+	/*add by zwf*/
+	//printk("regs + sfb->variant.wincon + (%d * 4) 0x%p\r\n",win,regs + sfb->variant.wincon + (win * 4));
+	//printk("regs + VIDOSD_A(win, sfb->variant) 0x%p\r\n",regs + VIDOSD_A(win, sfb->variant));
+	//printk("regs + VIDOSD_B(win, sfb->variant) 0x%p\r\n",regs + VIDOSD_B(win, sfb->variant));
+	//printk("regs + VIDOSD_C(win, sfb->variant) 0x%p\r\n",regs + VIDOSD_C(win, sfb->variant));
 
 	writel(0, regs + sfb->variant.wincon + (win * 4));
 	writel(0, regs + VIDOSD_A(win, sfb->variant));
@@ -1369,10 +1388,9 @@ static int s3c_fb_probe(struct platform_device *pdev)
 	int win;
 	int ret = 0;
 	u32 reg;
-
+	// pdev=&s3c_device_fb
 	platid = platform_get_device_id(pdev);
 	fbdrv = (struct s3c_fb_driverdata *)platid->driver_data;
-	printk("s3c_fb_probe()\r\n");
 	printk("platform device name [%s]\r\n",platid->name);
 	if (fbdrv->variant.nr_windows > S3C_FB_MAX_WIN) {
 		dev_err(dev, "too many windows, cannot attach\n");
@@ -1422,6 +1440,8 @@ static int s3c_fb_probe(struct platform_device *pdev)
 
 	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
 	sfb->regs = devm_ioremap_resource(dev, res);
+	printk("sfb->regs= 0x%p\r\n",sfb->regs);
+	//sfb->regs= 0xc08a0000
 	if (IS_ERR(sfb->regs)) {
 		ret = PTR_ERR(sfb->regs);
 		goto err_lcd_clk;
@@ -1449,7 +1469,19 @@ static int s3c_fb_probe(struct platform_device *pdev)
 	/* setup gpio and output polarity controls */
 
 	pd->setup_gpio();
-
+	/*
+	samsung s5pv210
+	pd->vidcon1 0x00000060,sfb->regs + VIDCON1 0xc08a0004
+	PHY Address VIDCON1 0xF800_0004 Specifies video control 1 register
+	VIDCON1={
+	[0:3]=Reserved
+	[4]=Specifies the VDEN signal polarity:0 = Normal,1 = Inverted
+	[5]=Specifies the VSYNC pulse polarity: 0 = Normal,1 = Inverted
+	[6]=Specifies the HSYNC pulse polarity0 = Normal,1 = Inverted
+	[7]=Controls the polarity of the VCLK active edge:0 = Video data is fetched at VCLK falling edge,1 = Video data is fetched at VCLK rising edge};
+	[8]=Reserved
+	[9:10]=Specifies the VCLK hold scheme at data under-flow:00 = VCLK hold 01 = VCLK running 11 = VCLK running and VDEN disable
+	*/
 	writel(pd->vidcon1, sfb->regs + VIDCON1);
 
 	/* set video clock running at under-run */
