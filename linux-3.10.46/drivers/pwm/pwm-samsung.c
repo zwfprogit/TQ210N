@@ -208,7 +208,7 @@ static int s3c_pwm_probe(struct platform_device *pdev)
 	unsigned long tcon;
 	unsigned int id = pdev->id;
 	int ret;
-
+	//pdev  s3c_device_timer[0] pdev->name=s3c24xx-pwm
 	if (id == 4) {
 		dev_err(dev, "TIMER4 is currently not supported\n");
 		return -ENXIO;

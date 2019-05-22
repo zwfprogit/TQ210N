@@ -170,7 +170,7 @@ static int pwm_backlight_probe(struct platform_device *pdev)
 	struct pwm_bl_data *pb;
 	unsigned int max;
 	int ret;
-
+	/*pdev = samsung_bl_device pdev->name = pwm-backlight*/
 	if (!data) {
 		ret = pwm_backlight_parse_dt(&pdev->dev, &defdata);
 		if (ret < 0) {
