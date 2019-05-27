@@ -54,6 +54,7 @@
 #include <linux/mtd/partitions.h>
 #include <linux/mtd/mtd.h>
 #include <linux/leds.h>
+#include <linux/gpio_keys.h>
 
 #include "common.h"
 
@@ -340,6 +341,63 @@ static struct platform_device tq210_leds = {
 	.id		= -1,
 };
 
+/* gpio keys (add by zwf) */
+static struct gpio_keys_button buttons[] = {
+	[0] = {
+		.code = KEY_UP,
+		.gpio = S5PV210_GPH0(0),
+		.active_low = 1,
+		.desc = "up",
+		.type = EV_KEY,
+		.debounce_interval = 50,
+	},
+	[1] = {
+		.code = KEY_DOWN,
+		.gpio = S5PV210_GPH0(1),
+		.active_low = 1,
+		.desc = "up",
+		.type = EV_KEY,
+		.debounce_interval = 50,
+	},
+	[2] = {
+		.code = KEY_LEFT,
+		.gpio = S5PV210_GPH0(2),
+		.active_low = 1,
+		.desc = "left",
+		.type = EV_KEY,
+		.debounce_interval = 50,
+	},
+	[3] = {
+		.code = KEY_RIGHT,
+		.gpio = S5PV210_GPH0(3),
+		.active_low = 1,
+		.desc = "left",
+		.type = EV_KEY,
+		.debounce_interval = 50,
+	},
+	[4] = {
+		.code = KEY_ENTER,
+		.gpio = S5PV210_GPH0(4),
+		.active_low = 1,
+		.desc = "enter",
+		.type = EV_KEY,
+		.debounce_interval = 50,
+	},
+};
+
+static struct gpio_keys_platform_data tq210_keys_pdata = {
+	.buttons = buttons,
+	.nbuttons = ARRAY_SIZE(buttons),
+	.rep = 1,
+};
+
+static struct platform_device tq210_keys = {
+	.name = "gpio-keys",
+	.dev = {
+		.platform_data =  &tq210_keys_pdata,
+	},
+	.id = -1,
+};
 
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&s3c_device_adc,
@@ -375,6 +433,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&s3c_device_timer[1],	/* add by zwf */
 	&tq210_beeper,			/* add by zwf */
 	&tq210_leds,			/* add by zwf */
+	&tq210_keys,			/* add by zwf */
 };
 
 static void __init smdkv210_dm9000_init(void)
