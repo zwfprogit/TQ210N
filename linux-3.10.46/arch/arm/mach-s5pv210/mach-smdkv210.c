@@ -457,6 +457,7 @@ static struct i2c_board_info smdkv210_i2c_devs0[] __initdata = {
 	//{ I2C_BOARD_INFO("24c08", 0x50), },     /* Samsung S524AD0XD1 */
 	//{ I2C_BOARD_INFO("wm8580", 0x1b), },
 	{ I2C_BOARD_INFO("24c02", 0x50), },	/*add by zwf*/
+	{ I2C_BOARD_INFO("TPS659101", 0x2D), },	/*add by zwf*/
 };
 
 static struct i2c_board_info smdkv210_i2c_devs1[] __initdata = {
