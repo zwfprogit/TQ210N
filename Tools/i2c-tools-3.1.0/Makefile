@@ -21,7 +21,8 @@ INSTALL_DIR	:= $(INSTALL) -m 755 -d
 INSTALL_PROGRAM	:= $(INSTALL) -m 755
 RM		:= rm -f
 
-CC	?= gcc
+#CC	?= gcc
+CC = arm-linux-gcc
 
 CFLAGS	?= -O2
 # When debugging, use the following instead
