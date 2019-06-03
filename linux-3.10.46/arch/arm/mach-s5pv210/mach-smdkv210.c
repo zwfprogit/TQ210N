@@ -55,6 +55,7 @@
 #include <linux/mtd/mtd.h>
 #include <linux/leds.h>
 #include <linux/gpio_keys.h>
+#include <linux/w1-gpio.h>
 
 #include "common.h"
 
@@ -399,6 +400,19 @@ static struct platform_device tq210_keys = {
 	.id = -1,
 };
 
+/* ds18b20 (add by zwf) */
+static struct w1_gpio_platform_data ds18b20_pdata = {
+	.pin		= S5PV210_GPH1(0),
+	.is_open_drain	= 0,
+	.ext_pullup_enable_pin = -1,
+};
+
+static struct platform_device ds18b20_device = {
+	.name			= "w1-gpio",
+	.id			= -1,
+	.dev.platform_data	= &ds18b20_pdata,
+};
+
 static struct platform_device *smdkv210_devices[] __initdata = {
 	&s3c_device_adc,
 	&s3c_device_cfcon,
@@ -434,6 +448,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&tq210_beeper,			/* add by zwf */
 	&tq210_leds,			/* add by zwf */
 	&tq210_keys,			/* add by zwf */
+	&ds18b20_device,		/* add by zwf */
 };
 
 static void __init smdkv210_dm9000_init(void)
