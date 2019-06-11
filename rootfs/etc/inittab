@@ -14,4 +14,4 @@
 # Stuff to do before rebooting
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/bin/umount -a -r
-#tty1::askfirst:-/bin/sh
+tty1::askfirst:-/bin/sh
