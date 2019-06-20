@@ -163,7 +163,12 @@ SYSCALL_DEFINE1(syncfs, int, fd)
 	fdput(f);
 	return ret;
 }
-
+SYSCALL_DEFINE1(myself_call, int, d)
+{
+	printk("receive one input =[%d] in kernel\r\n",d);
+	printk("myself_call in kernel\r\n");
+	return d;
+}
 /**
  * vfs_fsync_range - helper to sync a range of data & metadata to disk
  * @file:		file to sync
