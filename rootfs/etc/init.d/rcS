@@ -1,8 +1,10 @@
 #! /bin/sh
 
 #This is the first script called by init process
-mount -a
+mount -t tmpfs tmpfs /dev
 mkdir /dev/pts
 mount -t devpts devpts /dev/pts
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
 echo /sbin/mdev>/proc/sys/kernel/hotplug
 mdev -s
